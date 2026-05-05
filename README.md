@@ -6,7 +6,7 @@ This repository provides a **reproducible, portable, and research framework** fo
 - **Robustness**
 
 ### Dataset 
-Dataset generated using this repo can be found here [BeelieverBzz/trace-bench] (https://huggingface.co/datasets/BeelieverBzz/trace-bench/tree/main)
+Dataset generated using this repo can be found at HuggingFace [BeelieverBzz/trace-bench](https://huggingface.co/datasets/BeelieverBzz/trace-bench/tree/main)
 
 ---
 
@@ -153,6 +153,58 @@ python 2_generate_perturbed_audios.py \
 - Fixed random seed
 - Deterministic reference selection (longest utterance)
 - No absolute paths → fully portable across machines
+
+## 3. Evaluating Audio Language Models
+
+For evaluation, we use a [subset](1_5_data_subset_creator.py) of dataset for each evaluation.
+
+## Step 1. Response Collection
+
+This [script](3_model_responses_fairness_safety_robustness.py) evaluates generated (or perturbed) audio datasets using **Audio-Language Models (ALMs)** by collecting:
+- model responses
+- transcriptions
+- speaker attributes
+- latency
+
+It supports **fairness, safety, and robustness** settings.
+
+Supports:
+- **Batch inference** (if model supports it, e.g., Gemini)
+- **Sequential fallback**
+
+## Output
+
+Each record contains:
+- prompt + category
+- model response
+- transcription + speaker info (audio only)
+- demographic attributes
+- latency
+
+## Settings
+
+- `fairness` → evaluates clean TTS dataset  for 16 paralinguistic variations
+- `safety` → evaluates linguistic-focused subset  
+- `robustness` → evaluates perturbed audio (FGSM, PGD, noise, etc.)
+
+## Run
+
+### Audio evaluation (fairness)
+```bash
+python script.py \
+  --audio_model gemini3 \
+  --setting fairness \
+  --modality audio
+```
+
+## Step 2: Evaluation
+
+For individual trsutworthy axis evaluation - separate metrics are used:
+
+- `fairness` → [Fairness evaluation](4_2_fairness_eval.py) varied by the paralinguistic cues of the audio; evaluates consistency of comprehension rate per speaker, response across speaker and safety variance across speakers.
+- `safety` → [Safety Evaluation](4_1_safety_eval.py) varied by linguistic/lexical content; evaluates safetiness in text and audio modality, also evaluate for single- and multi- turn audios.
+- `robustness` → [Robustness Evaluation](4_1_robustness_eval.py) varied by channel noise, adversarial perturbation or acoustic corruptions; evaluates how robust is the model in the presence of these variations.
+
 
 
 
