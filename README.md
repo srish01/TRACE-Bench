@@ -158,7 +158,7 @@ python 2_generate_perturbed_audios.py \
 
 For evaluation, we use a [subset](1_5_data_subset_creator.py) of dataset for each evaluation.
 
-## Step 1. Response Collection
+### Step 1. Response Collection
 
 This [script](3_model_responses_fairness_safety_robustness.py) evaluates generated (or perturbed) audio datasets using **Audio-Language Models (ALMs)** by collecting:
 - model responses
@@ -172,7 +172,7 @@ Supports:
 - **Batch inference** (if model supports it, e.g., Gemini)
 - **Sequential fallback**
 
-## Output
+### Output
 
 Each record contains:
 - prompt + category
@@ -181,15 +181,15 @@ Each record contains:
 - demographic attributes
 - latency
 
-## Settings
+### Settings
 
 - `fairness` → evaluates clean TTS dataset  for 16 paralinguistic variations
 - `safety` → evaluates linguistic-focused subset  
 - `robustness` → evaluates perturbed audio (FGSM, PGD, noise, etc.)
 
-## Run
+### Run
 
-### Audio evaluation (fairness)
+#### Audio evaluation (fairness)
 ```bash
 python script.py \
   --audio_model gemini3 \
@@ -197,7 +197,7 @@ python script.py \
   --modality audio
 ```
 
-## Step 2: Evaluation
+###  Step 2: Evaluation
 
 For individual trsutworthy axis evaluation - separate metrics are used:
 
