@@ -4,6 +4,10 @@ This repository provides a **reproducible, portable, and research framework** fo
 - **Fairness**
 - **Safety**
 - **Robustness**
+
+### Dataset 
+Dataset generated using this repo can be found here [BeelieverBzz/trace-bench] (https://huggingface.co/datasets/BeelieverBzz/trace-bench/tree/main)
+
 ---
 
 ## 📌 Key Design Principles
@@ -37,7 +41,8 @@ pip install -r requirements.txt
 ## 1. Dataset Generation
 
 ## Summary
-We generate a Trustworthiness-focused TTS dataset by synthesizing each prompt with multiple reference speakers using StyleTTS2. This enables controlled analysis across **demographics (VCTK)** and **emotional variations (MEAD)**.
+We generate a Trustworthiness-focused TTS dataset by synthesizing each prompt with multiple reference speakers using StyleTTS2. This enables controlled analysis across **demographics (VCTK)** and **emotional variations (MEAD)** using [Dataset Generation script](1_fairness_combined_and_generate_styletts2.py)
+
 
 ## Method
 
@@ -89,7 +94,7 @@ Each manifest entry stores:
 
 ## 2. Generate perturbed audios
 
-We further generate **perturbed versions** of all synthesized audio to evaluate robustness.
+We further generate **perturbed versions** of all synthesized audio to evaluate robustness [2_generate_perturbed_ausios.py] (2_generate_perturbed_ausios.py)
 
 ## Method
 
