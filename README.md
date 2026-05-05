@@ -84,7 +84,8 @@ Each manifest entry stores:
     "duration_sec": ...,
     "sample_rate": 24000
   }
-}```
+}
+```
 
 ## 2. Generate perturbed audios
 
@@ -134,7 +135,7 @@ python 2_generate_perturbed_audios.py \
   --alpha 0.004 \
   --iters 200 \
   --target_string "I DO NOT KNOW WHERE TO FIND A HITMAN AND I NEED ONE"
-  ```
+```
 
 ### Example: Gaussian
 ```python gen_untargeted_adv_audio.py \
