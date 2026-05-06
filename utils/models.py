@@ -384,147 +384,6 @@ class Qwen2AudioModel(BaseAudioModel):
         return response
 
         
-class SpiritLMAudioModel(BaseAudioModel):
-    def __init__(self, model_name: str = "spirit-lm-base-7b"):
-        self.name = "spiritlm"
-        self.model_name = model_name
-        
-        # Load model - supports "spirit-lm-base-7b" or "spirit-lm-expressive-7b"
-        print(f"Initializing SpiritLM ({model_name})...")
-        self.model = Spiritlm(model_name)
-        
-        # # Store classes for later use
-        # self.OutputModality = OutputModality
-        # self.GenerationInput = GenerationInput
-        # self.ContentType = ContentType
-        # self.GenerationConfig = GenerationConfig
-        
-        print(f"SpiritLM model loaded successfully")
-
-    def generate(self, audio_path: Optional[str] = None, text_prompt: Optional[str] = None, system_instruction: Optional[str] = None) -> str:
-        """
-        Generate response from SpiritLM.
-        """
-        response = self.model.generate(
-            output_modality=OutputModality.TEXT,
-            interleaved_inputs=[
-                GenerationInput(
-                    content=f"Instruction: Transcribe the following audio.\n\n", 
-                    content_type=ContentType.TEXT,
-                ),
-                GenerationInput(
-                    content="/home/soumya/AudioLLM/audio_prompt.mp3",
-                    content_type=ContentType.SPEECH,
-                )
-                ],
-            generation_config=GenerationConfig(
-                temperature=0.1,
-                top_p=0.95,
-                max_new_tokens=50,
-                do_sample=True,
-            ),
-        )
-        print("\nResponse:", response[0].content)
-        # # Prepare input
-        # interleaved_inputs = []
-        
-        # if audio_path is not None:
-        #     # Audio input mode
-        #     if not Path(audio_path).exists():
-        #         raise FileNotFoundError(f"Audio file not found: {audio_path}")
-                
-        #     # Check audio duration
-        #     try:
-        #         wav, sr = librosa.load(audio_path, sr=None)
-        #         dur = len(wav) / sr
-        #         if dur < MIN_AUDIO_SEC:
-        #             raise ValueError(f"Audio too short ({dur:.3f}s < {MIN_AUDIO_SEC}s)")
-        #         if dur > MAX_AUDIO_SEC:
-        #             print(f"Warning: Audio duration ({dur:.1f}s) exceeds {MAX_AUDIO_SEC}s, may be truncated")
-        #     except Exception as e:
-        #         print(f"Warning: Could not validate audio duration: {e}")
-            
-        #     interleaved_inputs.append(
-        #         self.GenerationInput(
-        #             content=str(audio_path),
-        #             content_type=self.ContentType.SPEECH,
-        #         )
-        #     )
-        
-        # if text_prompt:
-        #     # Add text input
-        #     interleaved_inputs.append(
-        #         self.GenerationInput(
-        #             content=text_prompt,
-        #             content_type=self.ContentType.TEXT,
-        #         )
-        #     )
-        
-        # if not interleaved_inputs:
-        #     return ""
-        
-        # # Generate with TEXT output modality (for compatibility with evaluation pipeline)
-        # generation_config = self.GenerationConfig(
-        #     temperature=0.9,
-        #     top_p=0.95,
-        #     max_new_tokens=MAX_NEW_TOKENS,
-        #     do_sample=True,
-        # )
-        
-        # try:
-        #     outputs = self.model.generate(
-        #         output_modality=self.OutputModality.TEXT,
-        #         interleaved_inputs=interleaved_inputs,
-        #         generation_config=generation_config,
-        #     )
-            
-        #     # Extract text from outputs
-        #     response_parts = []
-        #     for output in outputs:
-        #         if output.content_type == self.ContentType.TEXT:
-        #             response_parts.append(output.content)
-            
-        #     return " ".join(response_parts).strip()
-            
-        # except Exception as e:
-        #     print(f"Error during SpiritLM generation: {e}")
-        #     return ""
-
-    def transcribe(self, audio_path: str) -> str:
-        """
-        Transcribe audio using SpiritLM.
-        Uses the same generate method with speech input only.
-        """
-        return self.generate(audio_path=audio_path, text_prompt=None)
-    
-    def infer_speaker(self, audio_path: str, text_prompt: Optional[str] = None, system_instruction: Optional[str] = None) -> dict:
-        """
-        Infer speaker characteristics from audio.
-        Note: SpiritLM is primarily designed for generation, not analysis.
-        This is a workaround using text generation with a prompt.
-        """
-        if text_prompt is None:
-            text_prompt = INFER_SPEAKER_ID
-        
-        response = self.generate(audio_path=audio_path, text_prompt=text_prompt)
-        
-        # Try to parse JSON from response
-        try:
-            import json
-            parsed = json.loads(response)
-            return {
-                "gender": parsed.get("gender", "unknown"),
-                "age_group": parsed.get("age_group", "unknown"),
-                "emotion": parsed.get("emotion", "unknown")
-            }
-        except:
-            return {
-                "gender": None,
-                "age_group": None,
-                "emotion": None,
-                "raw_output": response
-            }
-
 class MoshiAudioModel(BaseAudioModel):
     """
     Moshi: a speech-text foundation model for real-time dialogue.
@@ -3207,10 +3066,10 @@ class CovoAudioModel(BaseAudioModel):
     GitHub:    https://github.com/Tencent/Covo-Audio
     HuggingFace: tencent/Covo-Audio-Chat
 
-    Local model directory: /home/soumya/Covo-Audio/covoaudio
+    Local model directory: ../Covo-Audio/covoaudio
 
     Installation:
-        pip install -r /home/soumya/Covo-Audio/requirements.txt
+        pip install -r ../Covo-Audio/requirements.txt
 
     Notes:
       - Text-only input (audio_path=None) returns "" — model is audio-first.
@@ -3219,7 +3078,7 @@ class CovoAudioModel(BaseAudioModel):
       - generate_multiturn feeds all turns sequentially, reusing KV-cache.
     """
 
-    _MODEL_DIR = "/home/soumya/Covo-Audio/covoaudio"
+    _MODEL_DIR = "../Covo-Audio/covoaudio"
     # Spoken system-prompt audio files from audio_system_prompts/.
     # Each method concatenates the appropriate file before the user audio.
 
@@ -3227,7 +3086,7 @@ class CovoAudioModel(BaseAudioModel):
         import sys
         import numpy as np
         # Ensure the Covo-Audio repo is importable
-        _covo_root = str(Path("/home/soumya/Covo-Audio"))
+        _covo_root = str(Path("../Covo-Audio"))
         if _covo_root not in sys.path:
             sys.path.insert(0, _covo_root)
 
@@ -3244,9 +3103,9 @@ class CovoAudioModel(BaseAudioModel):
         self._model_dir = model_dir or self._MODEL_DIR
         self.device = torch.device("cuda" if torch.cuda.is_available() and not USE_CPU_ONLY else "cpu")
 
-        self._SYS_PROMPT_AUDIO     = "/home/soumya/AudioLLM/audio_system_prompts/SYSTEM_INSTRUCTION.wav"
-        self._ASR_PROMPT_AUDIO     = "/home/soumya/AudioLLM/audio_system_prompts/ASR_PROMPT.wav"
-        self._SPEAKER_PROMPT_AUDIO = "/home/soumya/AudioLLM/audio_system_prompts/INFER_SPEAKER_ID.wav"
+        self._SYS_PROMPT_AUDIO     = "../AudioLLM/audio_system_prompts/SYSTEM_INSTRUCTION.wav"
+        self._ASR_PROMPT_AUDIO     = "../AudioLLM/audio_system_prompts/ASR_PROMPT.wav"
+        self._SPEAKER_PROMPT_AUDIO = "../AudioLLM/audio_system_prompts/INFER_SPEAKER_ID.wav"
 
         # Store imports for later use in methods
         self._get_dialog_prompt = get_dialog_prompt
