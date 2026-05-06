@@ -67,10 +67,68 @@ Each manifest entry stores:
 - relative paths to reference and generated audio
 
 ### Key Design Choice
-- **All paths in manifests are relative**
-- No absolute paths → fully portable
 
-## Manifest Schema (per sample)
+### Python Version
+
+Python 3.9 or higher is required. Python 3.10 or 3.11 is recommended for best compatibility with PyTorch and the TTS libraries.
+
+### Core Packages (all scripts)
+```bash
+pip install torch torchaudio
+pip install pandas tqdm nltk
+pip install datasets       # HuggingFace datasets library
+pip install styletts2      # StyleTTS2 TTS engine
+pip install TTS           # when running the script with other TTS engines
+```
+
+### StyleTTS2 Model Checkpoints
+
+Two files must be downloaded manually from the [StyleTTS2 GitHub repository](https://github.com/yl4579/StyleTTS2) and placed in your working directory: Files can be found here (https://huggingface.co/yl4579/StyleTTS2-LibriTTS/tree/main/Models/LibriTTS)
+> Rename config.yml to `Models_LibriTTS_config.yml`
+
+| File                          | Purpose                                        |
+|-------------------------------|----------------------------------------------- |
+| `epochs_2nd_00020.pth`        | Trained model checkpoint weights               |
+| `Models_LibriTTS_config.yml`  | Model architecture and inference configuration |
+
+---
+
+### Local Data Folder Structure
+
+Script 1_fairness_combined_and_generate_styletts2.py expects a `raw_data/` folder in the working directory with following structure.
+```
+raw_data/
+  text_all.csv                        # Audio paths + transcripts (VCTK & MEAD)
+  CoSafe/
+    Single Prompt/                    # Single-turn harm prompt JSON files
+      animal_abuse.json
+      ...
+    CoSafe datasets/                  # Multi-turn conversation JSONs 
+      animal_abuse.json
+      ...
+  VCTK-Corpus/                        # Full VCTK audio corpus
+    wav48/                            # (or wav48_silence_trimmed with/)
+    speaker-info.txt                  # Demographic metadata
+  MEAD/               # MEAD emotion corpus (or raw_data/MEAD/) - only audios with 3 emotions - Happy, sad, angry - intensity level 3
+    M003/
+    M011/
+    W011/
+    W038/
+```
+
+### HuggingFace Dataset
+
+Downloaded automatically on first run (internet access required). Cached in `~/.cache/huggingface/datasets` by default.
+
+| Dataset                                                    | Used by                               |
+|------------------------------------------------------------|---------------------------------------|
+| `ZihanZhao/LibriSQA` (splits: `partI.train`, `partI.test`) |  benign Q&A prompt source             |
+| `PKU-Alignment/BeaverTails` (split: `330k_train`)          |  benign source                        |
+
+
+## Output
+
+### Manifest Schema (per sample)
 
 ```json
 {
@@ -204,6 +262,13 @@ For individual trsutworthy axis evaluation - separate metrics are used:
 - `fairness` → [Fairness evaluation](4_2_fairness_eval.py) varied by the paralinguistic cues of the audio; evaluates consistency of comprehension rate per speaker, response across speaker and safety variance across speakers.
 - `safety` → [Safety Evaluation](4_1_safety_eval.py) varied by linguistic/lexical content; evaluates safetiness in text and audio modality, also evaluate for single- and multi- turn audios.
 - `robustness` → [Robustness Evaluation](4_1_robustness_eval.py) varied by channel noise, adversarial perturbation or acoustic corruptions; evaluates how robust is the model in the presence of these variations.
+
+
+## Hardware Notes
+
+- A CUDA-capable GPU is strongly recommended. CPU generation is supported but very slow for large datasets.
+- Set `TTS_DEVICE = "cuda"` in the config section of each script to enable GPU acceleration.
+- **Disk space:** plan for several GB per TTS system depending on prompt count, reference count, and audio duration.
 
 
 
